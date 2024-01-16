@@ -1,4 +1,3 @@
-using CbrAdapter.Models;
 using CbrService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -41,12 +40,20 @@ namespace CbrAdapter.Controllers
 
             var response = Deserialize<Models.KeyRateResponse>(xml);
 
-            return Ok(response);
+            if (response != null)
+            {
+
+                response.KeyRates = response.KeyRates?.OrderBy(item => item.Date).ToList();
+
+                return Ok(response);
+            }
+
+            return Ok();
         }
 
-        private T Deserialize<T>(XmlDocument document)
+        private T? Deserialize<T>(XmlDocument document)
         {
-            return (T)new XmlSerializer(typeof(T)).Deserialize(new XmlNodeReader(document));
+            return (T?)new XmlSerializer(typeof(T?)).Deserialize(new XmlNodeReader(document));
         }
     }
 }
