@@ -1,4 +1,4 @@
-using CbrAdapter.Database.Repositories;
+using CbrAdapter.Services;
 using CbrService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,14 +12,14 @@ namespace CbrAdapter.Controllers
     [AllowAnonymous]
     public class DailyInfoController : ControllerBase
     {
-        private readonly IKeyRateRepository _keyRateRepository;
+        private readonly IKeyRateService _keyRateService;
         private readonly ILogger<DailyInfoController> _logger;
 
         public DailyInfoController(
-            IKeyRateRepository keyRateRepository,
+            IKeyRateService keyRateService,
             ILogger<DailyInfoController> logger)
         {
-            _keyRateRepository = keyRateRepository;
+            _keyRateService = keyRateService;
             _logger = logger;
         }
 
@@ -47,7 +47,6 @@ namespace CbrAdapter.Controllers
 
             if (response != null)
             {
-
                 response.KeyRates = response.KeyRates?.OrderBy(item => item.Date).ToList();
 
                 return Ok(response);
@@ -65,7 +64,7 @@ namespace CbrAdapter.Controllers
 
             var keyRateResponse = await client.KeyRateXMLAsync(new KeyRateXMLRequest
             {
-                fromDate = DateTime.Now.AddDays(-1),
+                fromDate = DateTime.Now.AddDays(-10),
                 ToDate = DateTime.Now
             });
 
@@ -78,13 +77,9 @@ namespace CbrAdapter.Controllers
 
             var response = Deserialize<Models.KeyRateResponse>(xml);
 
-            if (response != null)
+            if (response != null && response.KeyRates != null)
             {
-                await _keyRateRepository.Create(new Database.Models.KeyRate
-                {
-                    Value = response.KeyRates[0].Rate,
-                    Date = DateTime.SpecifyKind(response.KeyRates[0].Date, DateTimeKind.Utc)
-                });
+                await _keyRateService.CreateKeyRates(response.KeyRates);
 
                 return Ok(response);
             }

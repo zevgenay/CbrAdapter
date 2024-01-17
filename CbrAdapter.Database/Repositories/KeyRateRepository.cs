@@ -9,9 +9,9 @@ namespace CbrAdapter.Database.Repositories
         public KeyRateRepository(CbrAdapterDbContext context)
             => _context = context;
 
-        public async Task Create(KeyRate keyRate)
+        public async Task CreateKeyRates(ICollection<KeyRate> keyRates)
         {
-            await _context.AddAsync(keyRate);
+            await _context.AddRangeAsync(keyRates);
 
             await _context.SaveChangesAsync();
         }

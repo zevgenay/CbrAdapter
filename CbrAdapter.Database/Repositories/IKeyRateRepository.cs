@@ -4,6 +4,6 @@ namespace CbrAdapter.Database.Repositories
 {
     public interface IKeyRateRepository
     {
-        public Task Create(KeyRate keyRate);
+        public Task CreateKeyRates(ICollection<KeyRate> keyRates);
     }
 }
